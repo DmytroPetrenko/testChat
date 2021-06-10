@@ -1,89 +1,77 @@
 <template>
   <v-row justify="center" align="center">
-    <v-col cols="12" sm="8" md="6">
-      <div class="text-center">
-        <logo />
-        <vuetify-logo />
-      </div>
-      <v-card>
-        <v-card-title class="headline">
-          Welcome to the Vuetify + Nuxt.js template
-        </v-card-title>
-        <v-card-text>
-          <p>Vuetify is a progressive Material Design component framework for Vue.js. It was designed to empower developers to create amazing applications.</p>
-          <p>
-            For more information on Vuetify, check out the <a
-              href="https://vuetifyjs.com"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              documentation
-            </a>.
-          </p>
-          <p>
-            If you have questions, please join the official <a
-              href="https://chat.vuetifyjs.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="chat"
-            >
-              discord
-            </a>.
-          </p>
-          <p>
-            Find a bug? Report it on the github <a
-              href="https://github.com/vuetifyjs/vuetify/issues"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="contribute"
-            >
-              issue board
-            </a>.
-          </p>
-          <p>Thank you for developing with Vuetify and I look forward to bringing more exciting features in the future.</p>
-          <div class="text-xs-right">
-            <em><small>&mdash; John Leider</small></em>
+    <div class="col-md-6 offset-md-3 col-sm-12">
+      <h1 class="text-center">{{ title }}</h1>
+      <br />
+      <div id="status"></div>
+      <div id="chat">
+        <input
+          type="text"
+          v-model="name"
+          id="username"
+          class="form-control"
+          placeholder="Enter name..."
+        />
+        <br />
+        <div class="card">
+          <div id="messages" class="card-block">
+            <ul>
+              <li v-for="message of messages" v-bind:key="message">
+                {{ message.name }}: {{ message.text }}
+              </li>
+            </ul>
           </div>
-          <hr class="my-3">
-          <a
-            href="https://nuxtjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Nuxt Documentation
-          </a>
-          <br>
-          <a
-            href="https://github.com/nuxt/nuxt.js"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Nuxt GitHub
-          </a>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn
-            color="primary"
-            nuxt
-            to="/inspire"
-          >
-            Continue
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-col>
+        </div>
+        <br />
+        <textarea
+          id="textarea"
+          class="form-control"
+          v-model="text"
+          placeholder="Enter message..."
+        ></textarea>
+        <br />
+        <button id="send" class="btn" @click.prevent="sendMessage">
+          Send
+        </button>
+      </div>
+    </div>
   </v-row>
 </template>
 
 <script>
-import Logo from '~/components/Logo.vue'
-import VuetifyLogo from '~/components/VuetifyLogo.vue'
-
 export default {
-  components: {
-    Logo,
-    VuetifyLogo
+  data: function() {
+    return {
+      title: "Nestjs Websockets Chat",
+      name: "",
+      text: "",
+      messages: [],
+      socket: null
+    };
+  },
+  methods: {
+    sendMessage() {
+      if (this.validateInput()) {
+        const message = {
+          name: this.name,
+          text: this.text
+        };
+        this.socket.emit("msgToServer", message);
+        this.text = "";
+      }
+    },
+    receivedMessage(message) {
+      this.messages.push(message);
+    },
+    validateInput() {
+      return this.name.length > 0 && this.text.length > 0;
+    }
+  },
+  created() {
+    this.socket = io("http://localhost:8000");
+    this.socket.on("msgToClient", message => {
+      this.receivedMessage(message);
+    });
   }
-}
+};
 </script>
