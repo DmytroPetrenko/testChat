@@ -23,7 +23,12 @@ export default {
   css: [],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: [],
+  plugins: [
+    {
+      src: "~/plugins/socket.io.js",
+      ssr: false // <-- this line is required
+    }
+  ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,

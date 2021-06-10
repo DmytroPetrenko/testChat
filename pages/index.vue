@@ -16,7 +16,7 @@
         <div class="card">
           <div id="messages" class="card-block">
             <ul>
-              <li v-for="message of messages" v-bind:key="message">
+              <li v-for="(message, index) of messages" v-bind:key="index">
                 {{ message.name }}: {{ message.text }}
               </li>
             </ul>
@@ -44,10 +44,15 @@ export default {
     return {
       title: "Nestjs Websockets Chat",
       name: "",
-      text: "",
-      messages: [],
-      socket: null
+      text: ""
+      //messages: []
+      //socket: null
     };
+  },
+  computed: {
+    messages: function() {
+      return this.$store.state.msgs.msgs;
+    }
   },
   methods: {
     sendMessage() {
@@ -56,20 +61,31 @@ export default {
           name: this.name,
           text: this.text
         };
-        this.socket.emit("msgToServer", message);
+        this.$socket.client.emit("msgToServer", message);
         this.text = "";
       }
     },
     receivedMessage(message) {
-      this.messages.push(message);
+      //this.messages.push(message);
+      this.$store.commit("msgs/add", message);
     },
     validateInput() {
       return this.name.length > 0 && this.text.length > 0;
     }
   },
+  sockets: {
+    connect() {
+      console.log("socket connected");
+    },
+    customEmit(val) {
+      console.log(
+        'this method was fired by the socket server. eg: io.emit("customEmit", data)'
+      );
+    }
+  },
   created() {
-    this.socket = io("http://localhost:8000");
-    this.socket.on("msgToClient", message => {
+    //this.socket = io("http://localhost:8000");
+    this.$socket.client.on("msgToClient", message => {
       this.receivedMessage(message);
     });
   }
