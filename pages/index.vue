@@ -66,8 +66,6 @@ export default {
       }
     },
     receivedMessage(message) {
-      //this.messages.push(message);
-      console.log(message.name);
       this.$store.commit("msgs/add", message);
     },
     validateInput() {
@@ -78,14 +76,11 @@ export default {
     connect() {
       console.log("socket connected");
     },
-    customEmit(val) {
-      console.log(
-        'this method was fired by the socket server. eg: io.emit("customEmit", data)'
-      );
+    msgToClient(message) {
+      this.receivedMessage(message);
     }
   },
   created() {
-    //this.socket = io("http://localhost:8000");
     this.$socket.on("msgToClient", message => {
       this.receivedMessage(message);
     });
