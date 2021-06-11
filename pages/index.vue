@@ -1,96 +1,51 @@
 <template>
-  <v-row justify="center" align="center">
-    <div class="col-md-6 offset-md-3 col-sm-12">
-      <h1 class="text-center">{{ title }}</h1>
-      <br />
-      <div id="status"></div>
-      <div id="chat">
-        <input
-          type="text"
-          v-model="name"
-          id="username"
-          class="form-control"
-          placeholder="Enter name..."
-        />
-        <br />
-        <div class="card">
-          <div id="messages" class="card-block">
-            <ul>
-              <li v-for="(message, index) of messages" v-bind:key="index">
-                {{ message.name }}: {{ message.text }}
-              </li>
-            </ul>
-          </div>
-        </div>
-        <br />
-        <textarea
-          id="textarea"
-          class="form-control"
-          v-model="text"
-          placeholder="Enter message..."
-        ></textarea>
-        <br />
-        <button id="send" class="btn" @click.prevent="sendMessage">
-          Send
-        </button>
-      </div>
-    </div>
-  </v-row>
+  <v-container class="v-container">
+    <v-row no-gutters>
+      <v-col cols="12" sm="6" md="8" lg="9">
+        <v-card class="pa-2 ma-0" outlined tile>
+          Chat Page
+          <div v-if="users.users.length">{{ users.users[0].user.name }}</div>
+        </v-card>
+      </v-col>
+      <v-col cols="12" sm="6" md="4" lg="3">
+        <v-card class="pa-2" outlined tile>
+          .col-6 .col-md-4
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
+import { mapState } from "vuex";
 export default {
-  data: function() {
+  data() {
     return {
-      title: "Nestjs Websockets Chat",
-      name: "",
-      text: ""
-      //messages: []
-      //socket: null
+      title: "Chat bots 2.0"
     };
   },
-  computed: {
-    messages: function() {
-      return this.$store.state.msgs.msgs;
-    }
-  },
-  methods: {
-    sendMessage() {
-      if (this.validateInput()) {
-        const message = {
-          name: this.name,
-          text: this.text
-        };
-        this.$socket.emit("msgToServer", message);
-        this.text = "";
-      }
-    },
-    receivedMessage(message) {
-      this.$store.commit("msgs/add", message);
-    },
-    validateInput() {
-      return this.name.length > 0 && this.text.length > 0;
-    }
-  },
+  computed: mapState(["users"]),
   sockets: {
-    connect() {
-      console.log("socket connected");
-    },
-    msgToClient(message) {
-      this.receivedMessage(message);
+    getNewUser(user) {
+      this.$store.commit("users/addNewUser", user);
     }
   },
-  created() {
-    this.$socket.on("msgToClient", message => {
-      this.receivedMessage(message);
-    });
+  fetch() {
+    //const self = this;
+    if (!Object.keys(this.$store.state.users.users).length) {
+      // generate new user (for future db)
+      this.$socket.emit("generateNewUser");
+      // add to local storage
+    }
   }
 };
 </script>
 
 <style lang="scss" scoped>
-#messages {
-  height: 300px;
-  overflow-y: scroll;
+.v-container {
+  box-sizing: border-box;
+  background-color: #d7dfe7;
+  padding: 0;
+  height: 100%;
 }
 </style>
