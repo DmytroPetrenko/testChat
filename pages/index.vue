@@ -61,12 +61,13 @@ export default {
           name: this.name,
           text: this.text
         };
-        this.$socket.client.emit("msgToServer", message);
+        this.$socket.emit("msgToServer", message);
         this.text = "";
       }
     },
     receivedMessage(message) {
       //this.messages.push(message);
+      console.log(message.name);
       this.$store.commit("msgs/add", message);
     },
     validateInput() {
@@ -85,9 +86,16 @@ export default {
   },
   created() {
     //this.socket = io("http://localhost:8000");
-    this.$socket.client.on("msgToClient", message => {
+    this.$socket.on("msgToClient", message => {
       this.receivedMessage(message);
     });
   }
 };
 </script>
+
+<style lang="scss" scoped>
+#messages {
+  height: 300px;
+  overflow-y: scroll;
+}
+</style>
