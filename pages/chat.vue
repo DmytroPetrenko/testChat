@@ -1,7 +1,7 @@
 <template>
   <div>
     Chat Page
-    <div v-if="users.users.length">{{ users.users[0].user }}</div>
+    <div v-if="users.users.length">{{ users.users[0].user.name }}</div>
   </div>
 </template>
 
@@ -17,8 +17,10 @@ export default {
   fetch() {
     //const self = this;
     if (!Object.keys(this.$store.state.users.users).length) {
-      // generate new user
+      // generate new user (for future db)
       this.$socket.emit("generateNewUser");
+      // add to local storage
+
     }
   }
 };
