@@ -3,15 +3,17 @@ export const state = () => ({
 });
 
 export const actions = {
-  SOCKET_newMessage(ctx, data) {
-    console.log("Message received", data)
+  SOCKET_newMessage(ctx, msg) {
+    console.log(msg);
+    ctx.commit("add", msg);
+    //state.msgs = [...state.msgs];
   }
 };
 
 export const mutations = {
-  add(state, text) {
+  add(state, msg) {
     state.msgs.push({
-      text
+      msg
     });
   }
 };

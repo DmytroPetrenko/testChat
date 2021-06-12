@@ -41,6 +41,7 @@ main {
   .v-main__wrap {
     padding-top: 20px;
     padding-bottom: 50px;
+    max-height: calc(100vh - 80px);
   }
   .main-container {
     height: 100%;

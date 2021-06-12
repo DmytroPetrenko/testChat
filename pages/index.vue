@@ -15,8 +15,12 @@
               >
             </div>
           </v-card>
-
-          <div class="msg-block" v-if="users.users.length">
+          <div class="msg-block mr-2" v-if="users.users.length">
+            <Message
+              v-for="(message, index) in msgs.msgs"
+              :key="`message-${index}`"
+              :message="message.msg"
+            />
             {{ users.users[0].user.name }}
           </div>
           <div class="input-holder mb-5">
@@ -26,8 +30,12 @@
               name="MsgInput"
               id="msgInput"
               placeholder="Start chatting!"
+              v-model="message"
             />
-            <v-btn class="white--text ml-1 mr-2" color="#428bca"
+            <v-btn
+              class="white--text ml-1 mr-2"
+              color="#428bca"
+              @click.prevent="sendMessage"
               >Send message</v-btn
             >
           </div>
@@ -56,17 +64,35 @@
 
 <script>
 import { mapState } from "vuex";
+import Message from "@/components/Message.vue";
 export default {
+  components: { Message },
   data() {
     return {
       title: "Chat bots 2.0",
       imgSrc: "img/img1.jpg",
       show: "1",
       text:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+      message: ""
     };
   },
-  computed: mapState(["users"]),
+  computed: mapState(["users", "msgs"]),
+  methods: {
+    sendMessage() {
+      if (this.validateInput()) {
+        const message = this.message;
+        this.$socket.emit("msgToServer", message);
+        this.text = "";
+      }
+    },
+    /* receivedMessage(message) {
+      this.messages.push(message);
+    }, */
+    validateInput() {
+      return this.message.length > 0;
+    }
+  },
   sockets: {
     getNewUser(user) {
       this.$store.commit("users/addNewUser", user);
@@ -91,10 +117,15 @@ export default {
   height: 100%;
   .row-container {
     height: 100%;
+
     .chat-card {
       background-color: #d7dfe7;
       height: 100%;
       border: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+
       .header-chat-card {
         display: flex;
         flex-wrap: nowrap;
@@ -103,12 +134,27 @@ export default {
       }
       .msg-block {
         padding-left: 10px;
+        overflow-y: auto;
+        height: calc(100vh - 393px);
+      }
+      .msg-block::-webkit-scrollbar-track {
+        border-radius: 10px;
+        background-color: #becbd9;
+      }
+
+      .msg-block::-webkit-scrollbar {
+        border-radius: 10px;
+        width: 10px;
+        background-color: #becbd9;
+      }
+
+      .msg-block::-webkit-scrollbar-thumb {
+        border-radius: 10px;
+        background-color: #9daab9;
       }
       .input-holder {
         display: flex;
         flex-wrap: nowrap;
-        position: absolute;
-        bottom: 0;
         width: 100%;
 
         #msgInput {
