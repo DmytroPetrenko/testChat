@@ -16,7 +16,21 @@
             </div>
           </v-card>
 
-          <div v-if="users.users.length">{{ users.users[0].user.name }}</div>
+          <div class="msg-block" v-if="users.users.length">
+            {{ users.users[0].user.name }}
+          </div>
+          <div class="input-holder mb-5">
+            <input
+              class="ml-2 mr-1"
+              type="text"
+              name="MsgInput"
+              id="msgInput"
+              placeholder="Start chatting!"
+            />
+            <v-btn class="white--text ml-1 mr-2" color="#428bca"
+              >Send message</v-btn
+            >
+          </div>
         </v-card>
       </v-col>
       <v-col cols="12" sm="6" md="4" lg="3">
@@ -87,6 +101,36 @@ export default {
         background-color: #becbd9;
         border: 0;
       }
+      .msg-block {
+        padding-left: 10px;
+      }
+      .input-holder {
+        display: flex;
+        flex-wrap: nowrap;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+
+        #msgInput {
+          background-color: white !important;
+          border: 0 !important;
+          border-radius: 4px;
+          height: 38px;
+          flex-grow: 7;
+        }
+        #msgInput::placeholder {
+          font-size: 14px;
+          padding-left: 10px;
+        }
+        #msgInput:focus {
+          outline: 0;
+          box-shadow: 0 0 1pt 1pt #74b9ef;
+        }
+        .v-btn {
+          flex-grow: 1;
+          text-transform: capitalize;
+        }
+      }
     }
     .users-list {
       height: 100%;
@@ -103,12 +147,6 @@ export default {
         border: 0;
         background-color: #fff;
       }
-
-      /* .tabs {
-        position: relative;
-        top: 2px;
-        border: 2px solid red;
-      } */
     }
   }
 }
