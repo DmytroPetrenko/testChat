@@ -8,20 +8,21 @@
               <v-img :src="imgSrc"></v-img>
             </v-avatar>
             <div class="text-block">
-              <v-card-title>Top 10 Australian beaches</v-card-title>
+              <v-card-title v-if="users.length">{{
+                users[0].user.name
+              }}</v-card-title>
               <v-card-subtitle
                 >Listen to your favorite artists and albums whenever and
                 wherever, online and offline.</v-card-subtitle
               >
             </div>
           </v-card>
-          <div id="msgBlock" class="msg-block mr-2" v-if="users.length">
+          <div id="msgBlock" class="msg-block mr-2">
             <Message
               v-for="(message, index) in msgs"
               :key="`message-${index}`"
               :message="message.msg"
             />
-            {{ users[0].user.name }}
           </div>
           <div class="input-holder mb-5">
             <input
@@ -31,6 +32,7 @@
               id="msgInput"
               placeholder="Start chatting!"
               v-model="message"
+              @keyup.enter="sendMessage"
             />
             <v-btn
               class="white--text ml-1 mr-2"
@@ -63,7 +65,7 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState, mapActions } from "vuex";
 import Message from "@/components/Message.vue";
 export default {
   components: { Message },
@@ -90,11 +92,16 @@ export default {
     }
   },
   methods: {
+    ...mapActions(["users/addNewUser"]),
     sendMessage() {
       if (this.validateInput()) {
-        const message = this.message;
-        this.$socket.emit("msgToServer", message);
-        this.text = "";
+        console.log(this.users[0].user.id);
+        this.$socket.emit("msgToServer", {
+          message: this.message,
+          clientId: this.users[0].user.id,
+          clientName: this.users[0].user.name
+        });
+        this.message = "";
       }
     },
     /* receivedMessage(message) {
@@ -109,17 +116,25 @@ export default {
     }
   },
   sockets: {
-    getNewUser(user) {
+    setNewUser(user) {
+      localStorage.setItem("user", JSON.stringify(user));
       this.$store.commit("users/addNewUser", user);
+      /* this["users/addNewUser"](user); */
     }
   },
   fetch() {
-    //const self = this;
-    if (!Object.keys(this.$store.state.users.users).length) {
+    if (localStorage.getItem("user") == null) {
       // generate new user (for future db)
       this.$socket.emit("generateNewUser");
-      // add to local storage
+    } else {
+      const user = JSON.parse(localStorage.getItem("user"));
+      this.$store.commit("users/addNewUser", user);
+      /* this["users/addNewUser"](user); */
     }
+    /* if (!Object.keys(this.$store.state.users.users).length) {
+      // generate new user (for future db)
+      this.$socket.emit("generateNewUser");
+    } */
   }
 };
 </script>
@@ -178,10 +193,10 @@ export default {
           border-radius: 4px;
           height: 38px;
           flex-grow: 7;
+          padding-left: 10px;
         }
         #msgInput::placeholder {
           font-size: 14px;
-          padding-left: 10px;
         }
         #msgInput:focus {
           outline: 0;
