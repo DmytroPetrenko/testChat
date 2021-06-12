@@ -5,7 +5,7 @@
         <v-card class="pa-0 ma-0 chat-card" outlined tile>
           <v-card class="pa-0 ma-0 header-chat-card" outlined tile>
             <v-avatar class="ma-0" size="125" tile>
-              <v-img :src="imgSrc"></v-img>
+              <img src="" />
             </v-avatar>
             <div class="text-block">
               <v-card-title v-if="users.length">{{
@@ -76,7 +76,8 @@ export default {
       show: "1",
       text:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-      message: ""
+      message: "",
+      imgChunks: []
     };
   },
   computed: {
@@ -120,6 +121,14 @@ export default {
       localStorage.setItem("user", JSON.stringify(user));
       this.$store.commit("users/addNewUser", user);
       /* this["users/addNewUser"](user); */
+    },
+    sendChunk(chunk) {
+      let img = this.$el.querySelector("img");
+      this.imgChunks.push(chunk);
+      img.setAttribute(
+        "src",
+        "data:image/png;base64," + window.btoa(this.imgChunks)
+      );
     }
   },
   fetch() {
@@ -130,6 +139,7 @@ export default {
       const user = JSON.parse(localStorage.getItem("user"));
       this.$store.commit("users/addNewUser", user);
       /* this["users/addNewUser"](user); */
+      this.$socket.emit("getUserImg", user.imgSrc);
     }
     /* if (!Object.keys(this.$store.state.users.users).length) {
       // generate new user (for future db)
@@ -161,6 +171,10 @@ export default {
         flex-wrap: nowrap;
         background-color: #becbd9;
         border: 0;
+        img {
+          width: 100%;
+          height: 100%;
+        }
       }
       .msg-block {
         padding-left: 10px;
