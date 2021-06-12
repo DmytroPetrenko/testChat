@@ -15,13 +15,13 @@
               >
             </div>
           </v-card>
-          <div class="msg-block mr-2" v-if="users.users.length">
+          <div id="msgBlock" class="msg-block mr-2" v-if="users.length">
             <Message
-              v-for="(message, index) in msgs.msgs"
+              v-for="(message, index) in msgs"
               :key="`message-${index}`"
               :message="message.msg"
             />
-            {{ users.users[0].user.name }}
+            {{ users[0].user.name }}
           </div>
           <div class="input-holder mb-5">
             <input
@@ -77,7 +77,18 @@ export default {
       message: ""
     };
   },
-  computed: mapState(["users", "msgs"]),
+  computed: {
+    ...mapState({ msgs: state => state.msgs.msgs }),
+    ...mapState({ users: state => state.users.users })
+  },
+  watch: {
+    msgs: function() {
+      setTimeout(() => {
+        var container = this.$el.querySelector("#msgBlock");
+        container.scrollTop = container.scrollHeight;
+      }, 10);
+    }
+  },
   methods: {
     sendMessage() {
       if (this.validateInput()) {
@@ -91,6 +102,10 @@ export default {
     }, */
     validateInput() {
       return this.message.length > 0;
+    },
+    scrollToEnd: function() {
+      var container = this.$el.querySelector(".msg-block");
+      container.scrollTop = container.scrollHeight;
     }
   },
   sockets: {
