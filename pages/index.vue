@@ -9,7 +9,7 @@
             </v-avatar>
             <div class="text-block">
               <v-card-title v-if="users.length">{{
-                users[0].user.name
+                currentUser.name
               }}</v-card-title>
               <v-card-subtitle
                 >Listen to your favorite artists and albums whenever and
@@ -65,8 +65,9 @@
 </template>
 
 <script>
-import { mapState, mapActions } from "vuex";
+import { mapState, mapGetters } from "vuex";
 import Message from "@/components/Message.vue";
+import uniqid from "uniqid";
 export default {
   components: { Message },
   data() {
@@ -77,12 +78,15 @@ export default {
       text:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
       message: "",
-      imgChunks: []
+      imgChunks: [],
+      uniqid: ""
     };
   },
   computed: {
     ...mapState({ msgs: state => state.msgs.msgs }),
-    ...mapState({ users: state => state.users.users })
+    ...mapState({ users: state => state.users.users }),
+    ...mapState({ currentUser: state => state.users.currentUser }),
+    ...mapGetters("users", ["getUserById"])
   },
   watch: {
     msgs: function() {
@@ -90,24 +94,24 @@ export default {
         var container = this.$el.querySelector("#msgBlock");
         container.scrollTop = container.scrollHeight;
       }, 10);
+    },
+    currentUser: function() {
+      if (this.currentUser) {
+        localStorage.setItem("user", JSON.stringify(this.currentUser));
+      }
     }
   },
   methods: {
-    ...mapActions(["users/addNewUser"]),
     sendMessage() {
       if (this.validateInput()) {
-        console.log(this.users[0].user.id);
         this.$socket.emit("msgToServer", {
           message: this.message,
-          clientId: this.users[0].user.id,
-          clientName: this.users[0].user.name
+          clientId: this.currentUser.id,
+          clientName: this.currentUser.name
         });
         this.message = "";
       }
     },
-    /* receivedMessage(message) {
-      this.messages.push(message);
-    }, */
     validateInput() {
       return this.message.length > 0;
     },
@@ -117,11 +121,6 @@ export default {
     }
   },
   sockets: {
-    setNewUser(user) {
-      localStorage.setItem("user", JSON.stringify(user));
-      this.$store.commit("users/addNewUser", user);
-      /* this["users/addNewUser"](user); */
-    },
     sendChunk(chunk) {
       let img = this.$el.querySelector("img");
       this.imgChunks.push(chunk);
@@ -131,19 +130,24 @@ export default {
       );
     }
   },
-  fetch() {
-    if (localStorage.getItem("user") == null) {
-      this.$socket.emit("generateNewUser");
+  mounted() {
+    if (!localStorage.getItem("user")) {
+      this.uniqid = uniqid();
+      this.$socket.emit("generateNewUser", this.uniqid);
     } else {
       const user = JSON.parse(localStorage.getItem("user"));
-      this.$store.commit("users/addNewUser", user);
-      /* this["users/addNewUser"](user); */
-      this.$socket.emit("getUserImg", user.imgSrc);
+      this.$socket.emit("setUsers");
+      this.uniqid = user.id;
+      this.$store.commit("users/setCurrentUser", user);
     }
-    /* if (!Object.keys(this.$store.state.users.users).length) {
-      // generate new user (for future db)
-      this.$socket.emit("generateNewUser");
-    } */
+
+    if (!this.currentUser) {
+      const self = this;
+      setTimeout(() => {
+        const user = self.getUserById(self.uniqid);
+        self.$store.commit("users/setCurrentUser", user);
+      }, 100);
+    }
   }
 };
 </script>
