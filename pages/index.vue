@@ -133,7 +133,6 @@ export default {
   },
   fetch() {
     if (localStorage.getItem("user") == null) {
-      // generate new user (for future db)
       this.$socket.emit("generateNewUser");
     } else {
       const user = JSON.parse(localStorage.getItem("user"));
