@@ -22,6 +22,7 @@
               v-for="(message, index) in msgs"
               :key="`message-${index}`"
               :message="message.msg"
+              :color="currentUser.id === message.msg.id ? `#f0cbb3` : `#becbd9`"
             />
           </div>
           <div class="input-holder mb-5">
