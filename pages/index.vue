@@ -4,8 +4,8 @@
       <v-col cols="12" sm="6" md="8" lg="9">
         <v-card class="pa-0 ma-0 chat-card" outlined tile>
           <v-card class="pa-0 ma-0 header-chat-card" outlined tile>
-            <v-avatar class="ma-0" size="125" tile>
-              <img src="" />
+            <v-avatar class="ma-0" size="125" tile v-if="currentUser">
+              <MyImage :size="`125`" :user="currentUser" />
             </v-avatar>
             <div class="text-block">
               <v-card-title v-if="users.length">{{
@@ -52,10 +52,17 @@
             </v-tabs>
           </div>
           <v-tabs-items v-model="show">
-            <v-tab-item v-for="n in 2" :key="n">
+            <v-tab-item>
               <v-card flat>
-                <v-card-text>No.{{ n }}<br />{{ text }}</v-card-text>
+                <v-card-text>{{ text }}</v-card-text>
               </v-card>
+            </v-tab-item>
+            <v-tab-item>
+              <div v-for="user in users" :key="user.id">
+                <div v-if="user.id !== currentUser.id">
+                  <User :user="user" />
+                </div>
+              </div>
             </v-tab-item>
           </v-tabs-items>
         </v-card>
@@ -67,9 +74,11 @@
 <script>
 import { mapState, mapGetters } from "vuex";
 import Message from "@/components/Message.vue";
+import MyImage from "@/components/MyImage.vue";
+import User from "@/components/User.vue";
 import uniqid from "uniqid";
 export default {
-  components: { Message },
+  components: { Message, MyImage, User },
   data() {
     return {
       title: "Chat bots 2.0",
@@ -118,16 +127,6 @@ export default {
     scrollToEnd: function() {
       var container = this.$el.querySelector(".msg-block");
       container.scrollTop = container.scrollHeight;
-    }
-  },
-  sockets: {
-    sendChunk(chunk) {
-      let img = this.$el.querySelector("img");
-      this.imgChunks.push(chunk);
-      img.setAttribute(
-        "src",
-        "data:image/png;base64," + window.btoa(this.imgChunks)
-      );
     }
   },
   mounted() {
