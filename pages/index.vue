@@ -23,25 +23,17 @@
               :key="`message-${index}`"
               :message="message.msg"
               :color="currentUser.id === message.msg.id ? `#f0cbb3` : `#becbd9`"
+              :owner="
+                currentUser.id === message.msg.id ? `flex-end` : `flex-start`
+              "
             />
           </div>
-          <div class="input-holder mb-5">
-            <input
-              class="ml-2 mr-1"
-              type="text"
-              name="MsgInput"
-              id="msgInput"
-              placeholder="Start chatting!"
-              v-model="message"
-              @keyup.enter="sendMessage"
-            />
-            <v-btn
-              class="white--text ml-1 mr-2"
-              color="#428bca"
-              @click.prevent="sendMessage"
-              >Send message</v-btn
-            >
+          <div class="typing-message">
+            <p>
+              {{ typingMessage }}
+            </p>
           </div>
+          <InputButton :user="currentUser" />
         </v-card>
       </v-col>
       <v-col cols="12" sm="6" md="4" lg="3">
@@ -53,12 +45,12 @@
             </v-tabs>
           </div>
           <v-tabs-items v-model="show">
-            <v-tab-item>
+            <v-tab-item class="users-block">
               <v-card flat>
                 <v-card-text>{{ text }}</v-card-text>
               </v-card>
             </v-tab-item>
-            <v-tab-item>
+            <v-tab-item class="users-block">
               <div v-for="user in users" :key="user.id">
                 <div v-if="user.id !== currentUser.id">
                   <User :user="user" />
@@ -77,9 +69,10 @@ import { mapState, mapGetters } from "vuex";
 import Message from "@/components/Message.vue";
 import MyImage from "@/components/MyImage.vue";
 import User from "@/components/User.vue";
+import InputButton from "@/components/InputButton.vue";
 import uniqid from "uniqid";
 export default {
-  components: { Message, MyImage, User },
+  components: { Message, MyImage, User, InputButton },
   data() {
     return {
       title: "Chat bots 2.0",
@@ -87,16 +80,33 @@ export default {
       show: "1",
       text:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-      message: "",
       imgChunks: [],
       uniqid: ""
     };
   },
   computed: {
     ...mapState({ msgs: state => state.msgs.msgs }),
+    ...mapState({ typingUsers: state => state.msgs.typingUsers }),
     ...mapState({ users: state => state.users.users }),
     ...mapState({ currentUser: state => state.users.currentUser }),
-    ...mapGetters("users", ["getUserById"])
+    ...mapGetters("users", ["getUserById"]),
+    typingMessage: function() {
+      let typingMessage = "";
+      if (this.typingUsers.length) {
+        for (let i = 0; i < this.typingUsers.length; i++) {
+          typingMessage += this.typingUsers[i];
+          if (i + 1 < this.typingUsers.length) {
+            typingMessage += ", ";
+          }
+        }
+        if (this.typingUsers.length === 1) {
+          typingMessage += " is typing...";
+        } else {
+          typingMessage += " are typing...";
+        }
+      }
+      return typingMessage;
+    }
   },
   watch: {
     msgs: function() {
@@ -112,19 +122,6 @@ export default {
     }
   },
   methods: {
-    sendMessage() {
-      if (this.validateInput()) {
-        this.$socket.emit("msgToServer", {
-          message: this.message,
-          clientId: this.currentUser.id,
-          clientName: this.currentUser.name
-        });
-        this.message = "";
-      }
-    },
-    validateInput() {
-      return this.message.length > 0;
-    },
     scrollToEnd: function() {
       var container = this.$el.querySelector(".msg-block");
       container.scrollTop = container.scrollHeight;
@@ -199,35 +196,42 @@ export default {
         border-radius: 10px;
         background-color: #9daab9;
       }
-      .input-holder {
-        display: flex;
-        flex-wrap: nowrap;
-        width: 100%;
-
-        #msgInput {
-          background-color: white !important;
-          border: 0 !important;
-          border-radius: 4px;
-          height: 38px;
-          flex-grow: 7;
-          padding-left: 10px;
-        }
-        #msgInput::placeholder {
-          font-size: 14px;
-        }
-        #msgInput:focus {
-          outline: 0;
-          box-shadow: 0 0 1pt 1pt #74b9ef;
-        }
-        .v-btn {
-          flex-grow: 1;
-          text-transform: capitalize;
+      .typing-message {
+        display: inline-block;
+        vertical-align: bottom;
+        padding: 0;
+        color: #3a87ae;
+        font-size: 14px;
+        padding-left: 10px;
+        p {
+          margin: 0;
+          text-align: center;
         }
       }
     }
     .users-list {
       height: 100%;
       border: 0;
+
+      .users-block {
+        overflow-y: auto;
+        height: calc(100vh - 210px);
+      }
+      .users-block::-webkit-scrollbar-track {
+        border-radius: 10px;
+        background-color: #becbd9;
+      }
+
+      .users-block::-webkit-scrollbar {
+        border-radius: 10px;
+        width: 10px;
+        background-color: #becbd9;
+      }
+
+      .users-block::-webkit-scrollbar-thumb {
+        border-radius: 10px;
+        background-color: #9daab9;
+      }
 
       .v-tab {
         background-color: #f8f8f8;

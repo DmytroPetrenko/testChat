@@ -1,5 +1,5 @@
 <template>
-  <v-row class="ma-0">
+  <v-row class="ma-0 message-container" :style="messageContainerStyle">
     <v-col sm="8">
       <v-row no-gutters class="msg-info" :style="msgInfoStyle">
         <v-col cols="8" sm="10">
@@ -38,13 +38,21 @@ export default {
       return {
         "--color": this.color
       };
+    },
+    messageContainerStyle() {
+      return {
+        "--justifyContent": this.owner
+      };
     }
   },
-  props: ["message", "color"]
+  props: ["message", "color", "owner"]
 };
 </script>
 
 <style lang="scss" scoped>
+.message-container {
+  justify-content: var(--justifyContent);
+}
 .v-sheet.v-card {
   border-radius: 0;
 }
