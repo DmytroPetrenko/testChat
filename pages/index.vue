@@ -54,9 +54,9 @@
               <div v-for="user in users" :key="user.id">
                 <div
                   v-if="user.id !== currentUser.id"
-                  @click="openRoomWithUser(user.id)"
+                  @click="openRoomWithUser(user.id), selectItem(user.id)"
                 >
-                  <User :user="user" />
+                  <User :user="user" :activeId="activeId" />
                 </div>
               </div>
             </v-tab-item>
@@ -86,7 +86,8 @@ export default {
       imgChunks: [],
       uniqid: "",
       openedRoom: "",
-      room: ""
+      room: "",
+      activeId: -1
     };
   },
   computed: {
@@ -127,6 +128,9 @@ export default {
     }
   },
   methods: {
+    selectItem(id) {
+      this.activeId = id;
+    },
     scrollToEnd: function() {
       let container = this.$el.querySelector(".msg-block");
       container.scrollTop = container.scrollHeight;
@@ -146,24 +150,29 @@ export default {
         }
         console.log(this.room);
         this.$socket.emit("joinRoom", this.room);
-      } else {
       }
     },
     initRoom: function() {
       if (this.users.length > 1) {
         if (this.users[0].id !== this.currentUser.id) {
+          this.activeId = this.users[0].id;
           if (this.users[0].id > this.currentUser.id) {
-            this.openedRoom += this.currentUser.id + this.users[0].id;
+            this.room += this.currentUser.id + this.users[0].id;
           } else {
-            this.openedRoom += this.users[0].id + this.currentUser.id;
+            this.room += this.users[0].id + this.currentUser.id;
           }
         } else {
+          this.activeId = this.users[1].id;
           if (this.users[1].id > this.currentUser.id) {
-            this.openedRoom += this.currentUser.id + this.users[1].id;
+            this.room += this.currentUser.id + this.users[1].id;
           } else {
-            this.openedRoom += this.users[1].id + this.currentUser.id;
+            this.room += this.users[1].id + this.currentUser.id;
           }
         }
+        console.log(this.room);
+        this.$socket.emit("joinRoom", this.room);
+      } else {
+        console.log("Not enought users in app. Add more users, please!");
       }
     }
   },

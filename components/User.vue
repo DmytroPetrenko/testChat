@@ -1,6 +1,6 @@
 <template>
   <v-card>
-    <v-card-text>
+    <v-card-text :class="activeId === user.id ? `active` : ``">
       <MyImage :user="user" :size="`75`" />
       <div class="text-block">
         <v-card-title>{{ user.name }}</v-card-title>
@@ -19,7 +19,7 @@
 import MyImage from "@/components/MyImage.vue";
 export default {
   components: { MyImage },
-  props: ["user"],
+  props: ["user", "activeId"],
   filters: {
     truncate: function(text, length, suffix) {
       if (text.length > length) {
@@ -32,6 +32,9 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.active {
+  background-color: #f8f8f8;
+}
 .v-card__text {
   display: flex;
   flex-wrap: nowrap;
