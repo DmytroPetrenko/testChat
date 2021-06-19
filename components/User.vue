@@ -37,6 +37,7 @@ export default {
   flex-wrap: nowrap;
   border: 0;
   padding: 0;
+  cursor: pointer;
   .text-block {
     .v-card__title {
       font-size: 16px;

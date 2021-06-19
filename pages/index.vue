@@ -19,7 +19,7 @@
           </v-card>
           <div id="msgBlock" class="msg-block mr-2">
             <Message
-              v-for="(message, index) in msgs"
+              v-for="(message, index) in msgs[room]"
               :key="`message-${index}`"
               :message="message.msg"
               :color="currentUser.id === message.msg.id ? `#f0cbb3` : `#becbd9`"
@@ -33,7 +33,7 @@
               {{ typingMessage }}
             </p>
           </div>
-          <InputButton :user="currentUser" />
+          <InputButton :user="currentUser" :room="room" />
         </v-card>
       </v-col>
       <v-col cols="12" sm="6" md="4" lg="3">
@@ -52,7 +52,10 @@
             </v-tab-item>
             <v-tab-item class="users-block">
               <div v-for="user in users" :key="user.id">
-                <div v-if="user.id !== currentUser.id">
+                <div
+                  v-if="user.id !== currentUser.id"
+                  @click="openRoomWithUser(user.id)"
+                >
                   <User :user="user" />
                 </div>
               </div>
@@ -81,7 +84,9 @@ export default {
       text:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
       imgChunks: [],
-      uniqid: ""
+      uniqid: "",
+      openedRoom: "",
+      room: ""
     };
   },
   computed: {
@@ -123,8 +128,43 @@ export default {
   },
   methods: {
     scrollToEnd: function() {
-      var container = this.$el.querySelector(".msg-block");
+      let container = this.$el.querySelector(".msg-block");
       container.scrollTop = container.scrollHeight;
+    },
+    openRoomWithUser: function(userId) {
+      if (this.openedRoom !== this.room) {
+        this.$socket.emit("leaveRoom", this.openedRoom);
+        const someRoom = this.room;
+        this.room = "";
+        if (userId > this.currentUser.id) {
+          this.room += this.currentUser.id + userId;
+        } else {
+          this.room += userId + this.currentUser.id;
+        }
+        if (someRoom !== this.room) {
+          this.openedRoom = someRoom;
+        }
+        console.log(this.room);
+        this.$socket.emit("joinRoom", this.room);
+      } else {
+      }
+    },
+    initRoom: function() {
+      if (this.users.length > 1) {
+        if (this.users[0].id !== this.currentUser.id) {
+          if (this.users[0].id > this.currentUser.id) {
+            this.openedRoom += this.currentUser.id + this.users[0].id;
+          } else {
+            this.openedRoom += this.users[0].id + this.currentUser.id;
+          }
+        } else {
+          if (this.users[1].id > this.currentUser.id) {
+            this.openedRoom += this.currentUser.id + this.users[1].id;
+          } else {
+            this.openedRoom += this.users[1].id + this.currentUser.id;
+          }
+        }
+      }
     }
   },
   mounted() {
@@ -138,13 +178,14 @@ export default {
       this.$store.commit("users/setCurrentUser", user);
     }
 
-    if (!this.currentUser) {
-      const self = this;
-      setTimeout(() => {
+    const self = this;
+    setTimeout(function() {
+      if (!self.currentUser) {
         const user = self.getUserById(self.uniqid);
         self.$store.commit("users/setCurrentUser", user);
-      }, 100);
-    }
+      }
+      self.initRoom();
+    }, 100);
   }
 };
 </script>

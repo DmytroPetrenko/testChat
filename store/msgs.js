@@ -1,11 +1,15 @@
 export const state = () => ({
-  msgs: [],
+  msgs: {},
   typingUsers: []
 });
 
 export const actions = {
-  SOCKET_newMessage(ctx, msg) {
-    ctx.commit("add", msg);
+  SOCKET_newMessage({ commit, state }, msg) {
+    if (!state.msgs.hasOwnProperty(msg.room)) {
+      commit("createNewRoom", msg.room);
+    }
+
+    commit("add", msg);
   },
   SOCKET_regTypingUser(ctx, userName) {
     ctx.commit("addTypingUser", userName);
@@ -17,9 +21,11 @@ export const actions = {
 
 export const mutations = {
   add(state, msg) {
-    state.msgs.push({
-      msg
-    });
+    //const message = msg.msg;
+    state.msgs[msg.room].push({ msg });
+  },
+  createNewRoom(state, room) {
+    state.msgs = Object.assign({}, state.msgs, { [`${room}`]: [] });
   },
   addTypingUser(state, userName) {
     state.typingUsers.push(userName);

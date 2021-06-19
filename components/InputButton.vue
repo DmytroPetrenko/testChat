@@ -42,17 +42,26 @@ export default {
       }
     }
   },
-  props: ["user"],
+  props: ["user", "room"],
   methods: {
     sendMessage() {
       if (this.validateInput()) {
         this.$socket.emit("msgToServer", {
           message: this.message,
           clientId: this.user.id,
-          clientName: this.user.name
+          clientName: this.user.name,
+          room: this.room
         });
         this.message = "";
       }
+      /* if (this.validateInput()) {
+        this.$socket.emit("msgToServer", {
+          message: this.message,
+          clientId: this.user.id,
+          clientName: this.user.name
+        });
+        this.message = "";
+      } */
     },
     validateInput() {
       return this.message.length > 0;
