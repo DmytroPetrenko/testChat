@@ -7,7 +7,7 @@
         <v-card-subtitle>
           {{
             "Listen to your favorite artists and albums whenever and wherever, online and offline."
-              | truncate(50, "...")
+              | truncate(40, "...")
           }}
         </v-card-subtitle>
       </div>

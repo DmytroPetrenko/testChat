@@ -13,6 +13,13 @@ export const actions = {
   },
   async SOCKET_setAllUsers(ctx, users) {
     ctx.commit("setAllUsers", users);
+  },
+  async SOCKET_changeSocketId({ commit, state }, socketId) {
+    const obj = { id: state.currentUser.id, socketId: socketId };
+    setTimeout(() => {
+      commit("changeSocketId", socketId);
+      this._vm.$socket.emit("changeUserById", obj);
+    }, 100);
   }
 };
 
@@ -25,5 +32,12 @@ export const mutations = {
   },
   setCurrentUser(state, user) {
     state.currentUser = user;
+  },
+  changeSocketId(state, socketId) {
+    state.currentUser.socketId = socketId;
+    /* let index = state.users.indexOf(user => user.id === state.currentUser.id);
+    let user = state.users.find(user => user.id === state.currentUser.id);
+    user.socketId = socketId;
+    state.users.splice(index, 1, user); */
   }
 };

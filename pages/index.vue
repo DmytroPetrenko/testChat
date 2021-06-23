@@ -195,8 +195,6 @@ export default {
       }
       self.initRoom();
     }, 100);
-  
-  
   }
 };
 </script>
