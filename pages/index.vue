@@ -46,9 +46,16 @@
           </div>
           <v-tabs-items v-model="show">
             <v-tab-item class="users-block">
-              <v-card flat>
-                <v-card-text>{{ text }}</v-card-text>
-              </v-card>
+              <div v-for="user in users" :key="user.id">
+                <div
+                  v-if="
+                    user.id !== currentUser.id && user.socketId !== 'offline'
+                  "
+                  @click="openRoomWithUser(user.id), selectItem(user.id)"
+                >
+                  <User :user="user" :activeId="activeId" />
+                </div>
+              </div>
             </v-tab-item>
             <v-tab-item class="users-block">
               <div v-for="user in users" :key="user.id">
