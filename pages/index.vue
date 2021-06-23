@@ -46,7 +46,7 @@
           </div>
           <v-tabs-items v-model="show">
             <v-tab-item class="users-block">
-              <div v-for="user in users" :key="user.id">
+              <div v-for="user in resultQuery" :key="user.id">
                 <div
                   v-if="
                     user.id !== currentUser.id && user.socketId !== 'offline'
@@ -58,7 +58,7 @@
               </div>
             </v-tab-item>
             <v-tab-item class="users-block">
-              <div v-for="user in users" :key="user.id">
+              <div v-for="user in resultQuery" :key="user.id">
                 <div
                   v-if="user.id !== currentUser.id"
                   @click="openRoomWithUser(user.id), selectItem(user.id)"
@@ -67,6 +67,12 @@
                 </div>
               </div>
             </v-tab-item>
+            <input
+              class="form-control mt-3 mb-3 ml-1"
+              type="text"
+              v-model="searchQuery"
+              placeholder="Search"
+            />
           </v-tabs-items>
         </v-card>
       </v-col>
@@ -94,7 +100,8 @@ export default {
       uniqid: "",
       openedRoom: "",
       room: "",
-      activeId: -1
+      activeId: -1,
+      searchQuery: null
     };
   },
   computed: {
@@ -119,6 +126,18 @@ export default {
         }
       }
       return typingMessage;
+    },
+    resultQuery() {
+      if (this.searchQuery) {
+        return this.users.filter(item => {
+          return this.searchQuery
+            .toLowerCase()
+            .split(" ")
+            .every(v => item.name.toLowerCase().includes(v));
+        });
+      } else {
+        return this.users;
+      }
     }
   },
   watch: {
